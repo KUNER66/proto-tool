@@ -388,6 +388,147 @@
   var ready = false;    // iframe 内运行时是否就绪
   var lastNotes = [];   // 最近一次从 iframe 收到的备注快照
 
+  /* ------------------------------------------------------------ 宿主适配层 */
+  /* 同一份界面跑在两种后端上：
+       · 浏览器 + Node 本地服务 → HTTP /api/*
+       · Tauri 桌面端           → invoke 自定义指令
+     两者对外暴露完全相同的数据形状，所以下面的业务代码一行都不用改。 */
+  var TAURI = (typeof window.__TAURI__ === 'undefined') ? null : window.__TAURI__;
+
+  /* Tauri 模式下注入逻辑要跑在前端，按需加载 src/lib/injector.js。
+     HTTP 模式不需要它（服务端自己注入），所以不加载，省一次无谓请求。 */
+  var injReady = Promise.resolve();
+  if (TAURI) {
+    injReady = new Promise(function (res, rej) {
+      var s = document.createElement('script');
+      s.src = 'lib/injector.js';
+      s.onload = res;
+      s.onerror = function () { rej(new Error('注入核心载入失败：lib/injector.js')); };
+      document.head.appendChild(s);
+    });
+  }
+
+  function baseName(p) {
+    var s = String(p || '');
+    var i = Math.max(s.lastIndexOf('/'), s.lastIndexOf('\\'));
+    return i >= 0 ? s.slice(i + 1) : s;
+  }
+
+  /* Rust 的 list_dir 结果 → 服务端 /api/browse 的数据形状 */
+  function toBrowse(L) {
+    var items = [];
+    (L.dirs || []).forEach(function (e) {
+      items.push({ type: e.kind === 'drive' ? 'drive' : 'dir', name: e.name, path: e.path, size: 0 });
+    });
+    (L.files || []).forEach(function (e) {
+      items.push({ type: 'file', name: e.name, path: e.path, size: e.size });
+    });
+    return { ok: true, cwd: L.dir || '', parent: L.parent || '', quick: [], items: items };
+  }
+
+  /* Tauri invoke 包装：把 reject 统一转成 {ok:false,error}，
+     这样上层的判断逻辑与服务端返回完全一致，不用写两套。 */
+  function call(cmd, args, map) {
+    return TAURI.core.invoke(cmd, args)
+      .then(function (r) { return map ? map(r) : r; })
+      .catch(function (e) { return { ok: false, error: String((e && e.message) || e) }; });
+  }
+
+  var host = TAURI ? {
+    name: 'tauri',
+
+    ping: function () { return Promise.resolve({ ok: true }); },
+
+    browse: function (dir) {
+      return call('list_dir', { dir: dir || '' }, toBrowse);
+    },
+
+    stat: function (file) {
+      return call('stat_file', { path: file }, function (s) {
+        return { ok: true, file: s.path, name: baseName(s.path), size: s.size, mtime: s.modified };
+      });
+    },
+
+    /* 落盘。注入语义必须与 server/index.js 的 /api/notes PUT 逐字一致：
+       先 stripInjected 幂等剥离，再 injectInto 重新写入。 */
+    save: function (file, notes) {
+      var r = injReady
+        .then(function () { return TAURI.core.invoke('read_text_file', { path: file }); })
+        .then(function (src) {
+          return TAURI.core.invoke('read_runtime').then(function (rt) {
+            var out = AN_INJECTOR.injectInto(src, notes || [], rt);
+            return TAURI.core.invoke('write_text_file', { path: file, content: out });
+          });
+        })
+        .then(function () { return TAURI.core.invoke('stat_file', { path: file }); })
+        .then(function (s) {
+          return { ok: true, count: (notes || []).length, size: s.size, mtime: s.modified };
+        });
+      return r.catch(function (e) { return { ok: false, error: String((e && e.message) || e) }; });
+    },
+
+    purge: function (file) {
+      var r = injReady
+        .then(function () { return TAURI.core.invoke('read_text_file', { path: file }); })
+        .then(function (src) {
+          var out = AN_INJECTOR.stripOrphanMarks(AN_INJECTOR.stripInjected(src));
+          return TAURI.core.invoke('write_text_file', { path: file, content: out });
+        })
+        .then(function () { return TAURI.core.invoke('stat_file', { path: file }); })
+        .then(function (s) { return { ok: true, size: s.size, mtime: s.modified }; });
+      return r.catch(function (e) { return { ok: false, error: String((e && e.message) || e) }; });
+    },
+
+    /* 把注入后的原型喂进 iframe。
+       Tauri 里没有本地 HTTP 服务，所以走 srcdoc —— srcdoc 继承父页面的源，
+       同源才能让 iframe 内的运行时回调 window.parent.__AN_HOST__。 */
+    view: function (file) {
+      return injReady
+        .then(function () { return TAURI.core.invoke('read_text_file', { path: file }); })
+        .then(function (src) {
+          return TAURI.core.invoke('read_runtime').then(function (rt) {
+            var html = AN_INJECTOR.injectInto(
+              src, AN_INJECTOR.extractNotes(src), rt, { editMode: true });
+            frame.removeAttribute('src');
+            frame.srcdoc = html;
+          });
+        });
+    }
+  } : {
+    name: 'http',
+
+    ping: function () {
+      return fetch('/api/ping').then(function (r) { return r.json(); });
+    },
+    browse: function (dir) {
+      return fetch('/api/browse?dir=' + encodeURIComponent(dir || ''))
+        .then(function (r) { return r.json(); });
+    },
+    stat: function (file) {
+      return fetch('/api/stat?file=' + encodeURIComponent(file))
+        .then(function (r) { return r.json(); });
+    },
+    save: function (file, notes) {
+      return fetch('/api/notes', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ file: file, notes: notes })
+      }).then(function (r) { return r.json(); });
+    },
+    purge: function (file) {
+      return fetch('/api/purge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ file: file })
+      }).then(function (r) { return r.json(); });
+    },
+    view: function (file) {
+      frame.removeAttribute('srcdoc');
+      frame.src = '/api/view?file=' + encodeURIComponent(file) + '&t=' + Date.now();
+      return Promise.resolve();
+    }
+  };
+
   /* ------------------------------------------------------------ 状态显示 */
   function setStatus(text, kind) {
     statusEl.textContent = text || '';
@@ -440,12 +581,7 @@
     saving = true;
     setStatus('保存中…');
 
-    fetch('/api/notes', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ file: current.file, notes: notes })
-    })
-      .then(function (r) { return r.json(); })
+    host.save(current.file, notes)
       .then(function (d) {
         saving = false;
         if (!d.ok) throw new Error(d.error || '未知错误');
@@ -521,8 +657,7 @@
 
   function browse(dir) {
     fbBody.innerHTML = '<div class="fb-empty">读取中…</div>';
-    fetch('/api/browse?dir=' + encodeURIComponent(dir || ''))
-      .then(function (r) { return r.json(); })
+    host.browse(dir)
       .then(function (d) {
         if (!d.ok) {
           fbBody.innerHTML = '<div class="fb-empty">' + (d.error || '读取失败') + '</div>';
@@ -608,8 +743,7 @@
 
   function pickAndLoad(p) {
     showVeil(true, '正在载入…');
-    fetch('/api/stat?file=' + encodeURIComponent(p))
-      .then(function (r) { return r.json(); })
+    host.stat(p)
       .then(function (d) {
         showVeil(false);
         if (!d.ok) { setStatus('载入失败：' + (d.error || ''), 'err'); return; }
@@ -635,12 +769,12 @@
     empty.classList.add('hide');
 
     setStatus('载入中…');
-    frame.src = '/api/view?file=' + encodeURIComponent(d.file) + '&t=' + Date.now();
+    host.view(d.file);
   }
 
   /* 兜底：只要 iframe 开始加载，就确保空态层不挡视线 */
   frame.addEventListener('load', function () {
-    if (frame.getAttribute('src')) empty.classList.add('hide');
+    if (frame.getAttribute('src') || frame.getAttribute('srcdoc')) empty.classList.add('hide');
   });
 
   /* ------------------------------------------------------------ 重载 / 清除 */
@@ -655,7 +789,7 @@
     if (!current) return;
     ready = false;
     setStatus('重新载入…');
-    frame.src = '/api/view?file=' + encodeURIComponent(current.file) + '&t=' + Date.now();
+    host.view(current.file);
   });
 
   btnPurge.addEventListener('click', function () {
@@ -668,12 +802,7 @@
     )) return;
 
     showVeil(true, '正在清除…');
-    fetch('/api/purge', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ file: current.file })
-    })
-      .then(function (r) { return r.json(); })
+    host.purge(current.file)
       .then(function (d) {
         showVeil(false);
         if (!d.ok) throw new Error(d.error || '未知错误');
@@ -705,13 +834,12 @@
   });
 
   /* ------------------------------------------------------------ 首屏自检 */
-  fetch('/api/ping').then(function (r) { return r.json(); }).then(function () {
+  host.ping().then(function () {
     // 支持 ?file=xxx 直接载入（便于从命令行/快捷方式拉起指定原型）
     var q = new URLSearchParams(location.search);
     var pre = q.get('file');
     if (pre) {
-      fetch('/api/stat?file=' + encodeURIComponent(pre))
-        .then(function (r) { return r.json(); })
+      host.stat(pre)
         .then(function (d) { if (d.ok) loadFile(d); else setStatus('载入失败：' + (d.error || ''), 'err'); })
         .catch(function () { setStatus('就绪 · 点「打开原型」开始'); });
       return;

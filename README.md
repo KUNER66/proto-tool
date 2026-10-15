@@ -98,6 +98,56 @@ set PORT=7320 && start.bat           # 用环境变量（Windows）
 
 ---
 
+## 桌面客户端
+
+不想装 Node、也不想开命令行？桌面版把整套东西打包成一个 exe，双击就能用。
+
+> **状态**：代码已完成，安装包待构建。
+
+### 构建桌面版
+
+三样依赖，只需装一次：
+
+| 依赖 | 用途 | 获取方式 |
+|---|---|---|
+| **Node.js 18+** | 安装 Tauri CLI | [nodejs.org](https://nodejs.org) |
+| **Rust** | 编译桌面端 | [rustup.rs](https://rustup.rs)，工具链选 `stable-x86_64-pc-windows-msvc` |
+| **Microsoft C++ 生成工具** | Tauri 的 Windows 后端要编译少量 C/C++ 依赖 | Visual Studio Build Tools，勾「使用 C++ 的桌面开发」 |
+
+Windows 10 21H2 / 11 自带 WebView2 运行时，无需额外安装。
+
+```bash
+git clone https://github.com/KUNER66/proto-tool.git
+cd proto-tool
+npm install
+npm run desktop:build
+```
+
+产物任选其一安装：
+
+```
+src-tauri/target/release/bundle/nsis/proto-tool_0.2.0_x64-setup.exe
+src-tauri/target/release/bundle/msi/proto-tool_0.2.0_x64_en-US.msi
+```
+
+开发模式（改完直接看效果）：
+
+```bash
+npm run desktop
+```
+
+### 为什么桌面版和命令行版的注入结果完全一致
+
+Rust 侧**只做文件读写**——列目录、读文件、原子写盘、读运行时。
+
+剥离旧标记、构造数据块、插入运行时，**全部交给 `src/lib/injector.js`**，桌面端与 Node 服务端共用同一份实现。要是 Rust 里再写一份，两边迟早漂移，最后"同一个文件用不同方式打开存出来的结果不一样"。
+
+界面层同理：`src/index.html` 里有一层 `host` 适配，HTTP 模式走 `fetch('/api/*')`，桌面模式走 Tauri `invoke`，**两者对外暴露完全相同的数据形状**，业务代码一行没改。
+
+> macOS / Linux 也能构建，但需各自的原生依赖（Xcode CLT / webkit2gtk），并先在 `tauri.conf.json` 的 `bundle.targets` 里放开对应产物格式。仓库目前只配置了 Windows 的 `nsis` / `msi`。
+
+---
+
 ## 怎么用
 
 | 操作 | 说明 |
@@ -239,7 +289,7 @@ npm run test:all   # 全部
 ## 路线图
 
 - [x] v0.1 · Node 本地服务 + 浏览器界面
-- [ ] v0.2 · Tauri 桌面客户端（安装包 ~5MB，免装 Node）
+- [~] v0.2 · Tauri 桌面客户端（安装包 ~5MB，免装 Node）—— 代码完成，待构建
 - [ ] v0.3 · 备注清单导出为 Markdown / 需求文档格式
 - [ ] v0.4 · 多文件原型支持
 

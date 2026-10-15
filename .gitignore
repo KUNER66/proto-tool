@@ -37,5 +37,7 @@ test/tmp/
 examples/*-test.html
 examples/_*.html
 
-# ---- Tauri（桌面端，后续版本） ----
+# ---- Tauri 桌面端 ----
 src-tauri/target/
+src-tauri/gen/schemas/
+

@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "proto-tool 桌面端默认权限。文件读写全部走本应用自己的自定义指令（list_dir / read_text_file / write_text_file 等），Tauri 2 里自有指令不需要额外授权；因此这里只放行 core 的基础能力，不开放任何插件级系统权限（无 shell、无任意 fs 作用域、无 http）。",
+  "windows": ["main"],
+  "permissions": ["core:default"]
+}

@@ -99,6 +99,56 @@ Two sample prototypes live in `examples/` — open either one with the tool.
 
 ---
 
+## Desktop client
+
+Prefer not to install Node or touch a terminal? The desktop build packages everything into a single exe.
+
+> **Status**: code complete, installer not built yet.
+
+### Building the desktop app
+
+Three prerequisites, installed once:
+
+| Dependency | Why | Get it |
+|---|---|---|
+| **Node.js 18+** | installs the Tauri CLI | [nodejs.org](https://nodejs.org) |
+| **Rust** | compiles the desktop shell | [rustup.rs](https://rustup.rs), toolchain `stable-x86_64-pc-windows-msvc` |
+| **Microsoft C++ Build Tools** | Tauri's Windows backend compiles a small amount of C/C++ | Visual Studio Build Tools, tick "Desktop development with C++" |
+
+Windows 10 21H2 / 11 ship the WebView2 runtime, so nothing extra is needed.
+
+```bash
+git clone https://github.com/KUNER66/proto-tool.git
+cd proto-tool
+npm install
+npm run desktop:build
+```
+
+Installers land here - pick either:
+
+```
+src-tauri/target/release/bundle/nsis/proto-tool_0.2.0_x64-setup.exe
+src-tauri/target/release/bundle/msi/proto-tool_0.2.0_x64_en-US.msi
+```
+
+Dev mode (see changes without packaging):
+
+```bash
+npm run desktop
+```
+
+### Why the desktop and CLI builds inject identically
+
+The Rust side **only touches files** - listing directories, reading, atomic writes, reading the runtime.
+
+Stripping old markers, building the data block and inserting the runtime is **all done by `src/lib/injector.js`**, shared with the Node server. A second implementation in Rust would drift, and you would end up with the same file saving differently depending on which tool opened it.
+
+The UI works the same way: `src/index.html` has a `host` adapter - `fetch('/api/*')` over HTTP, Tauri `invoke` on desktop - and **both expose identical data shapes**, so no business logic changed.
+
+> macOS / Linux can be built too, but need their own native dependencies (Xcode CLT / webkit2gtk) and the matching entries in `bundle.targets`. The repo currently configures Windows `nsis` / `msi` only.
+
+---
+
 ## Usage
 
 | Action | Description |
@@ -252,7 +302,7 @@ Requires Node 18+. **No third-party dependencies.**
 ## Roadmap
 
 - [x] v0.1 · Node local server + browser UI
-- [ ] v0.2 · Tauri desktop client (~5 MB installer, no Node required)
+- [~] v0.2 · Tauri desktop client (~5 MB installer, no Node required) - code complete, build pending
 - [ ] v0.3 · Export notes as Markdown / spec-document format
 - [ ] v0.4 · Multi-file prototype support
 
