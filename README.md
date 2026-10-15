@@ -87,7 +87,7 @@ npm start                  # 启动并自动打开浏览器
 
 ```bash
 proto-tool --open                    # 装成全局命令后
-node src/server.js --port 7320       # 不装全局，直接传参
+node server/index.js --port 7320       # 不装全局，直接传参
 PORT=7320 npm start                  # 用环境变量（macOS / Linux）
 set PORT=7320 && start.bat           # 用环境变量（Windows）
 ```
@@ -170,13 +170,14 @@ proto-tool/
 ├── start.bat                   Windows 启动器（双击即用）
 ├── start.sh                    macOS / Linux 启动器
 ├── package.json
-├── lib/
-│   └── injector.js             ★ 注入核心：剥离 / 构造 / 读写（纯字符串，无依赖）
-├── src/
-│   ├── server.js               本地服务：静态资源 + 文件浏览 + 写盘
+├── src/                        ★ 前端资源（桌面端打包的就是这一份）
 │   ├── index.html              工具宿主界面
+│   ├── lib/
+│   │   └── injector.js         ★ 注入核心：剥离 / 构造 / 读写（纯字符串，无依赖）
 │   └── runtime/
 │       └── annotator.js        ★ 注入到目标 HTML 的运行时
+├── server/
+│   └── index.js                Node 本地服务：静态资源 + 文件浏览 + 写盘
 ├── test/
 │   ├── injector.test.js        注入逻辑单元测试
 │   └── server.e2e.js           本地服务端到端测试
@@ -184,7 +185,7 @@ proto-tool/
 └── docs/                       文档与截图
 ```
 
-`lib/injector.js` 是**纯函数模块**——不依赖 `fs`、`http` 或任何环境，
+`src/lib/injector.js` 是**纯函数模块**——不依赖 `fs`、`http` 或任何环境，
 所以本地服务、未来的桌面端、CLI、单元测试可以共用同一套注入语义，
 不会出现「两边实现各改各的」导致行为漂移。
 

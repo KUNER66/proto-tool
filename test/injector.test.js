@@ -1,5 +1,5 @@
 /* ==========================================================================
- * lib/injector.js 单元测试
+ * src/lib/injector.js 单元测试
  * 运行：node test/injector.test.js
  * ========================================================================== */
 
@@ -7,7 +7,7 @@
 
 const assert = require('assert');
 const path = require('path');
-const inj = require(path.join(__dirname, '..', 'lib', 'injector.js'));
+const inj = require(path.join(__dirname, '..', 'src', 'lib', 'injector.js'));
 
 let pass = 0, fail = 0;
 const cases = [];

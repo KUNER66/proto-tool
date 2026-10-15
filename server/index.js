@@ -1,5 +1,5 @@
 /* ==========================================================================
- * proto-tool · 本地服务 src/server.js
+ * proto-tool · 本地服务 server/index.js
  * --------------------------------------------------------------------------
  * 职责：
  *   1. 提供工具宿主页（src/index.html）与静态资源
@@ -8,9 +8,9 @@
  *   4. 接收前端备注，幂等写回源 HTML
  *   5. 清除备注，还原干净原型
  *
- * 注入语义全部来自 lib/injector.js —— 与将来的 Tauri 端共用同一份实现。
+ * 注入语义全部来自 src/lib/injector.js —— 与桌面端共用同一份实现。
  *
- * 启动：node src/server.js [--open] [--port 7317]
+ * 启动：node server/index.js [--open] [--port 7317]
  * ========================================================================== */
 
 'use strict';
@@ -19,10 +19,10 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
-const injector = require('../lib/injector.js');
+const injector = require('../src/lib/injector.js');
 
 const ROOT = path.join(__dirname, '..');
-const SRC = __dirname;
+const SRC = path.join(ROOT, 'src');   /* 前端资源目录：桌面端打包的也是这一份 */
 const RUNTIME_FILE = path.join(SRC, 'runtime', 'annotator.js');
 
 const HOST = '127.0.0.1';

@@ -66,4 +66,4 @@ echo "   Your notes are already saved into the HTML."
 echo "  ------------------------------------------------"
 echo
 
-exec "$NODE_EXE" src/server.js --open --port "$APP_PORT"
+exec "$NODE_EXE" server/index.js --open --port "$APP_PORT"

@@ -57,7 +57,7 @@ npm test
 
 - **ES5 语法用于运行时**（`src/runtime/annotator.js`）。
   它会被烧进用户的 HTML，可能运行在各种老浏览器里，不要用箭头函数、`let` / `const`、模板字符串。
-- **现代语法用于服务端与工具**（`src/server.js`、`lib/`、`test/`）。Node 18+ 环境，随便用。
+- **现代语法用于服务端与工具**（`server/index.js`、`lib/`、`test/`）。Node 18+ 环境，随便用。
 - 注释写**为什么**，不写**做了什么**。踩过的坑请留在注释里，避免后人重蹈。
 - 中文注释可以，英文也行。保持一致即可。
 
@@ -72,7 +72,7 @@ feat: 支持备注导出为 Markdown
 fix: 修复切标签页后锚点偏移未重算
 docs: 补充 SCHEMA 里的锚定字段说明
 test: 补充多标记残留的剥离用例
-refactor: 把注入逻辑从 server.js 抽到 lib/injector.js
+refactor: 把注入逻辑从 server 抽到 src/lib/injector.js
 ```
 
 一次提交只做一件事。改动注入逻辑时，**请连带补上测试**。

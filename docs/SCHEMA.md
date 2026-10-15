@@ -124,7 +124,7 @@
 ## 读写示例（Node）
 
 ```js
-const injector = require('./lib/injector.js');
+const injector = require('./src/lib/injector.js');
 const fs = require('fs');
 
 // 读

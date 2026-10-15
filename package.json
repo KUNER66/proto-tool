@@ -23,20 +23,20 @@
   "bugs": {
     "url": "https://github.com/KUNER66/proto-tool/issues"
   },
-  "main": "lib/injector.js",
+  "main": "src/lib/injector.js",
   "bin": {
-    "proto-tool": "src/server.js"
+    "proto-tool": "server/index.js"
   },
   "files": [
-    "lib/",
-    "src/"
+    "src/",
+    "server/"
   ],
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
-    "start": "node src/server.js --open",
-    "serve": "node src/server.js",
+    "start": "node server/index.js --open",
+    "serve": "node server/index.js",
     "test": "node test/injector.test.js",
     "test:e2e": "node test/server.e2e.js",
     "test:browser": "node test/browser.smoke.mjs",

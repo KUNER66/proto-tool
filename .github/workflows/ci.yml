@@ -35,7 +35,7 @@ jobs:
       - name: Start server in background
         shell: bash
         run: |
-          node src/server.js --port 7318 > server.log 2>&1 &
+          node server/index.js --port 7318 > server.log 2>&1 &
           node -e '
             const http = require("http");
             const deadline = Date.now() + 20000;

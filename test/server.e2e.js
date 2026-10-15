@@ -97,7 +97,7 @@ function ok(name, cond, extra) {
        { data: tag2('an-data'), runtime: tag2('an-runtime') });
 
     /* 6b. 用 injector 直接验证「剥离后 == 原文」——最硬的幂等判据 */
-    const injector = require('../lib/injector.js');
+    const injector = require('../src/lib/injector.js');
     const restored = injector.stripInjected(disk2);
     const origRaw = fs.readFileSync(FILE_BACKUP, 'utf8');
     ok('剥离注入后与注入前原文完全一致', restored === origRaw,

@@ -88,7 +88,7 @@ CLI flags:
 
 ```bash
 proto-tool --open                    # after installing globally
-node src/server.js --port 7320       # or pass it directly
+node server/index.js --port 7320       # or pass it directly
 PORT=7320 npm start                  # via env var (macOS / Linux)
 set PORT=7320 && start.bat           # via env var (Windows)
 ```
@@ -193,7 +193,7 @@ proto-tool/
 └── docs/                       Docs and screenshots
 ```
 
-`lib/injector.js` is a **pure module** — no dependency on `fs`, `http`, or any
+`src/lib/injector.js` is a **pure module** — no dependency on `fs`, `http`, or any
 environment. The server, a future desktop client, a CLI, and the test suite can all
 share the same injection semantics, so there's no risk of the two implementations
 drifting apart.

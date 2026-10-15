@@ -70,7 +70,7 @@ echo    Your notes are already saved into the HTML.
 echo   ------------------------------------------------
 echo.
 
-"!NODE_EXE!" src\server.js --open --port %APPPORT%
+"!NODE_EXE!" server\index.js --open --port %APPPORT%
 set "CODE=%errorlevel%"
 
 echo.
@@ -79,11 +79,11 @@ if not "%CODE%"=="0" (
   echo.
   echo   Common causes:
   echo     - Port %APPPORT% already used by something else
-  echo     - src\server.js is missing or damaged
+  echo     - server\index.js is missing or damaged
   echo     - Node.js is too old (need 18+)
   echo.
   echo   To see the real error, run this in the folder:
-  echo     "!NODE_EXE!" src\server.js
+  echo     "!NODE_EXE!" server\index.js
   echo.
   echo   To use another port, set PORT first, e.g.:
   echo     set PORT=7320
