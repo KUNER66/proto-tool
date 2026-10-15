@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test:
+    name: Test on ${{ matrix.os }} / Node ${{ matrix.node }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node: ['18', '20', '22']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Show versions
+        run: |
+          node -v
+          npm -v
+
+      - name: Unit tests (injection core)
+        run: node test/injector.test.js
+
+      - name: Start server in background
+        shell: bash
+        run: |
+          node src/server.js --port 7318 > server.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -s -m 2 http://127.0.0.1:7318/api/ping > /dev/null 2>&1; then
+              echo "server is up"
+              exit 0
+            fi
+            sleep 0.5
+          done
+          echo "server failed to start"
+          cat server.log
+          exit 1
+
+      - name: End-to-end tests (local server)
+        env:
+          PORT_TEST: '7318'
+        run: node test/server.e2e.js
+
+      - name: Upload server log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-log-${{ matrix.os }}-${{ matrix.node }}
+          path: server.log
+          if-no-files-found: ignore

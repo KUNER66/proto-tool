@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>页签切换测试原型</title>
+<style>
+  * { box-sizing: border-box; }
+  body{font:14px/1.7 "Microsoft YaHei",sans-serif;margin:0;background:#f5f7fa;color:#1f2329;}
+  .wrap{max-width:860px;margin:0 auto;padding:32px 24px 140px;}
+  h1{font-size:19px;margin:0 0 4px;}
+  .sub{color:#86909c;font-size:13px;margin-bottom:22px;}
+
+  .tabs{display:flex;gap:4px;border-bottom:1px solid #e5e6eb;margin-bottom:22px;}
+  .tab{padding:9px 18px;cursor:pointer;border:1px solid transparent;border-bottom:none;
+       border-radius:8px 8px 0 0;color:#4e5969;font-size:14px;user-select:none;}
+  .tab:hover{background:#f2f6ff;color:#165DFF;}
+  .tab.on{background:#fff;border-color:#e5e6eb;color:#165DFF;font-weight:500;margin-bottom:-1px;}
+
+  .panel{display:none;background:#fff;border:1px solid #e5e6eb;border-radius:0 10px 10px 10px;padding:22px;}
+  .panel.on{display:block;}
+
+  .panel h2{font-size:15px;margin:0 0 12px;color:#1f2329;}
+  table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px;}
+  th,td{border:1px solid #e5e6eb;padding:8px 10px;text-align:left;}
+  th{background:#f7f8fa;font-weight:500;}
+  .note-box{background:#f7f8fa;border-left:3px solid #165DFF;padding:12px 14px;border-radius:0 6px 6px 0;font-size:13px;color:#4e5969;}
+  .tall{height:420px;background:#fafbfc;border:1px dashed #d6d9de;border-radius:8px;
+        display:flex;align-items:center;justify-content:center;color:#a9aeb8;font-size:13px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>页签切换测试原型</h1>
+  <div class="sub">用于验证：在页签 A 贴的备注，切到页签 B 后不该留在原地。</div>
+
+  <div class="tabs">
+    <div class="tab on" data-tab="a">检修计划</div>
+    <div class="tab" data-tab="b">人员排班</div>
+    <div class="tab" data-tab="c">设备台账</div>
+  </div>
+
+  <div class="panel on" id="pane-a">
+    <h2>检修计划</h2>
+    <table>
+      <tr><th>工单号</th><th>车组</th><th>检修类型</th><th>计划日期</th></tr>
+      <tr><td>JX-20261015-001</td><td>0501</td><td>全效修</td><td>2026-10-16</td></tr>
+      <tr><td>JX-20261015-002</td><td>0502</td><td>镟修</td><td>2026-10-17</td></tr>
+    </table>
+    <div class="note-box">这是页签 A 的内容区，在此处贴一张便利贴，然后切到页签 B 观察。</div>
+  </div>
+
+  <div class="panel" id="pane-b">
+    <h2>人员排班</h2>
+    <div class="tall">页签 B 内容（高度与页签 A 不同）</div>
+  </div>
+
+  <div class="panel" id="pane-c">
+    <h2>设备台账</h2>
+    <div class="tall">页签 C 内容</div>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('.tab').forEach(function (t) {
+    t.addEventListener('click', function () {
+      var k = t.dataset.tab;
+      document.querySelectorAll('.tab').forEach(function (x) { x.classList.toggle('on', x === t); });
+      document.querySelectorAll('.panel').forEach(function (p) {
+        p.classList.toggle('on', p.id === 'pane-' + k);
+      });
+    });
+  });
+</script>
+
+</body>
+</html>

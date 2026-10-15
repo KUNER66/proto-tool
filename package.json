@@ -1,0 +1,52 @@
+{
+  "name": "html-note",
+  "version": "0.1.0",
+  "description": "给任意 HTML 原型贴便利贴，备注直接烧进文件——发给别人双击就能看到，零依赖、零联网。",
+  "keywords": [
+    "annotation",
+    "notes",
+    "sticky-notes",
+    "prototype",
+    "html",
+    "wireframe",
+    "axure-alternative",
+    "offline",
+    "self-contained"
+  ],
+  "license": "MIT",
+  "author": "",
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "homepage": "",
+  "bugs": {
+    "url": ""
+  },
+  "main": "lib/injector.js",
+  "bin": {
+    "html-note": "src/server.js"
+  },
+  "files": [
+    "lib/",
+    "src/"
+  ],
+  "scripts": {
+    "start": "node src/server.js --open",
+    "serve": "node src/server.js",
+    "test": "node test/injector.test.js",
+    "test:e2e": "node test/server.e2e.js",
+    "test:browser": "node test/browser.smoke.mjs",
+    "test:all": "node test/injector.test.js && node test/server.e2e.js && node test/browser.smoke.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "os": [
+    "win32",
+    "darwin",
+    "linux"
+  ],
+  "dependencies": {},
+  "devDependencies": {}
+}

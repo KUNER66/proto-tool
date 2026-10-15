@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>html-note</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    font: 13px/1.5 "Microsoft YaHei", "PingFang SC", -apple-system, "Segoe UI", sans-serif;
+    color: #1f2329;
+    background: #f5f7fa;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ---------------- 顶栏 ---------------- */
+  .topbar {
+    flex: none;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 16px;
+    background: #fff;
+    border-bottom: 1px solid rgba(0, 0, 0, .1);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .04);
+    z-index: 10;
+  }
+  .brand {
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: .3px;
+    padding-right: 4px;
+    white-space: nowrap;
+  }
+  .brand::before {
+    content: "";
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 2px;
+    background: #165DFF;
+    margin-right: 7px;
+    vertical-align: 1px;
+  }
+
+  .filechip {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    max-width: 460px;
+    padding: 4px 10px;
+    background: #f2f5fa;
+    border: 1px solid rgba(22, 93, 255, .18);
+    border-radius: 7px;
+  }
+  .filechip.on { display: flex; }
+  .filechip .nm {
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #165DFF;
+  }
+  .filechip .sz { flex: none; color: #86909c; font-size: 12px; }
+
+  .spacer { flex: 1; }
+
+  button.btn {
+    font: 13px/1.5 inherit;
+    height: 32px;
+    padding: 0 14px;
+    border: 1px solid rgba(0, 0, 0, .15);
+    border-radius: 6px;
+    background: #fff;
+    color: #1f2329;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background .15s, border-color .15s, color .15s;
+  }
+  button.btn:hover { background: #f3f5f8; }
+  button.btn:disabled { opacity: .45; cursor: not-allowed; background: #fff; }
+  button.btn.primary {
+    background: #165DFF;
+    border-color: #165DFF;
+    color: #fff;
+  }
+  button.btn.primary:hover { background: #0e4fd8; }
+  button.btn.danger { color: #f53f3f; }
+  button.btn.danger:hover { background: #fef1f1; border-color: #f7c1c1; }
+
+  .status {
+    flex: none;
+    max-width: 320px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 12px;
+    color: #86909c;
+  }
+  .status.err { color: #f53f3f; }
+  .status.ok { color: #00b42a; }
+
+  /* ---------------- 舞台 ---------------- */
+  .stage {
+    flex: 1;
+    min-height: 0;
+    position: relative;
+    background: #e9edf2;
+  }
+  #frame {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+    background: #fff;
+  }
+
+  /* ---------------- 空态 ---------------- */
+  .empty {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    color: #86909c;
+    text-align: center;
+    pointer-events: none;
+  }
+  .empty.hide { display: none; }
+  .empty .big {
+    font-size: 15px;
+    color: #4e5969;
+    font-weight: 500;
+  }
+  .empty .hint { font-size: 12px; line-height: 1.9; }
+  .empty kbd {
+    font: 12px/1 inherit;
+    padding: 2px 6px;
+    border: 1px solid rgba(0, 0, 0, .15);
+    border-bottom-width: 2px;
+    border-radius: 4px;
+    background: #fff;
+    color: #4e5969;
+  }
+
+  /* ---------------- 步骤条 ---------------- */
+  .steps {
+    display: flex;
+    gap: 26px;
+    margin-top: 6px;
+  }
+  .step { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+  .step i {
+    font-style: normal;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, .12);
+    color: #165DFF;
+    font-weight: 500;
+    font-size: 11px;
+    line-height: 18px;
+    text-align: center;
+  }
+
+  /* ---------------- 遮罩 ---------------- */
+  .veil {
+    position: absolute;
+    inset: 0;
+    background: rgba(245, 247, 250, .82);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    color: #4e5969;
+    z-index: 20;
+  }
+  .veil.on { display: flex; }
+
+  /* ---------------- 文件浏览器弹窗 ---------------- */
+  .fb-mask {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .38);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+  }
+  .fb-mask.on { display: flex; }
+  .fb {
+    width: 720px;
+    max-width: calc(100vw - 48px);
+    height: 560px;
+    max-height: calc(100vh - 80px);
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, .22);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .fb-head {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(0, 0, 0, .08);
+  }
+  .fb-title { font-size: 14px; font-weight: 500; flex: none; }
+  .fb-path {
+    flex: 1;
+    min-width: 0;
+    height: 30px;
+    padding: 0 10px;
+    border: 1px solid rgba(0, 0, 0, .15);
+    border-radius: 6px;
+    font: 12px/30px inherit;
+    color: #4e5969;
+    background: #f7f8fa;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .fb-close {
+    flex: none;
+    width: 30px; height: 30px;
+    border: 1px solid rgba(0, 0, 0, .12);
+    border-radius: 6px;
+    background: #fff;
+    cursor: pointer;
+    color: #86909c;
+    font-size: 15px;
+    line-height: 1;
+  }
+  .fb-close:hover { background: #f3f5f8; color: #f53f3f; }
+
+  .fb-quick {
+    flex: none;
+    display: flex;
+    gap: 8px;
+    padding: 10px 16px;
+    border-bottom: 1px solid rgba(0, 0, 0, .06);
+    background: #fafbfc;
+  }
+  .fb-quick button {
+    font: 12px/1.5 inherit;
+    padding: 4px 10px;
+    border: 1px solid rgba(0, 0, 0, .12);
+    border-radius: 6px;
+    background: #fff;
+    color: #4e5969;
+    cursor: pointer;
+  }
+  .fb-quick button:hover { background: #eef3ff; border-color: #165DFF; color: #165DFF; }
+
+  .fb-body {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    padding: 6px;
+  }
+  .fb-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 7px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .fb-row:hover { background: #f2f6ff; }
+  .fb-ico {
+    flex: none;
+    width: 18px; height: 18px;
+    border-radius: 4px;
+    font-size: 11px;
+    line-height: 18px;
+    text-align: center;
+    color: #fff;
+    font-weight: 500;
+  }
+  .fb-row.dir .fb-ico { background: #165DFF; }
+  .fb-row.up .fb-ico { background: #86909c; }
+  .fb-row.file .fb-ico { background: #00b42a; }
+  .fb-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #1f2329;
+  }
+  .fb-row.file .fb-name { color: #165DFF; }
+  .fb-meta { flex: none; font-size: 12px; color: #86909c; }
+  .fb-hint {
+    padding: 3px 10px 8px 38px;
+    font-size: 11px;
+    color: #a9aeb8;
+  }
+  .fb-empty { padding: 40px; text-align: center; color: #86909c; font-size: 13px; }
+  .fb-foot {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    border-top: 1px solid rgba(0, 0, 0, .08);
+    background: #fafbfc;
+  }
+  .fb-foot .tip { flex: 1; font-size: 12px; color: #86909c; }
+</style>
+</head>
+<body>
+
+<div class="fb-mask" id="fbMask">
+  <div class="fb">
+    <div class="fb-head">
+      <span class="fb-title">选择原型 HTML</span>
+      <span class="fb-path" id="fbPath">我的电脑</span>
+      <button class="fb-close" id="fbClose" title="关闭">✕</button>
+    </div>
+    <div class="fb-quick" id="fbQuick"></div>
+    <div class="fb-body" id="fbBody"></div>
+    <div class="fb-foot">
+      <span class="tip">只显示 .html / .htm 文件 · 单击文件夹进入 · 单击文件打开 · Esc 关闭</span>
+    </div>
+  </div>
+</div>
+
+<div class="topbar">
+  <span class="brand">html-note</span>
+
+  <span class="filechip" id="chip">
+    <span class="nm" id="chipName"></span>
+    <span class="sz" id="chipSize"></span>
+  </span>
+
+  <button class="btn primary" id="btnOpen">打开原型</button>
+  <button class="btn" id="btnReload" disabled>重新载入</button>
+  <button class="btn danger" id="btnPurge" disabled>清除备注</button>
+
+  <span class="spacer"></span>
+  <span class="status" id="status">就绪</span>
+</div>
+
+<div class="stage">
+  <iframe id="frame" title="原型预览"></iframe>
+
+  <div class="empty" id="empty">
+    <div class="big">还没有打开原型</div>
+    <div class="steps">
+      <span class="step"><i>1</i>打开原型，选中任意 HTML</span>
+      <span class="step"><i>2</i>点顶部「+ 备注」，再点页面任意位置贴便利贴</span>
+      <span class="step"><i>3</i>改完自动存回源文件</span>
+    </div>
+    <div class="hint">
+      备注分「正式说明」和「内部待办」两类，都会写进 HTML。<br>
+      把这个 HTML 发给别人，对方双击就能看到。
+    </div>
+  </div>
+
+  <div class="veil" id="veil">处理中，请稍候…</div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var frame = document.getElementById('frame');
+  var empty = document.getElementById('empty');
+  var veil = document.getElementById('veil');
+  var chip = document.getElementById('chip');
+  var chipName = document.getElementById('chipName');
+  var chipSize = document.getElementById('chipSize');
+  var statusEl = document.getElementById('status');
+  var btnOpen = document.getElementById('btnOpen');
+  var btnReload = document.getElementById('btnReload');
+  var btnPurge = document.getElementById('btnPurge');
+
+  var current = null;   // { file, name, size, mtime, notes }
+  var ready = false;    // iframe 内运行时是否就绪
+  var lastNotes = [];   // 最近一次从 iframe 收到的备注快照
+
+  /* ------------------------------------------------------------ 状态显示 */
+  function setStatus(text, kind) {
+    statusEl.textContent = text || '';
+    statusEl.className = 'status' + (kind ? ' ' + kind : '');
+  }
+  function showVeil(on, text) {
+    veil.classList.toggle('on', !!on);
+    if (text) veil.textContent = text;
+  }
+  function fmtSize(n) {
+    if (n == null) return '';
+    if (n < 1024) return n + ' B';
+    if (n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB';
+    return (n / 1048576).toFixed(2) + ' MB';
+  }
+  function fmtTime(ms) {
+    var d = new Date(ms);
+    var p = function (x) { return (x < 10 ? '0' : '') + x; };
+    return p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
+  }
+  function shorten(p, max) {
+    max = max || 46;
+    if (p.length <= max) return p;
+    return '…' + p.slice(p.length - max + 1);
+  }
+
+  /* ------------------------------------------------------------ 取当前备注 */
+  function getNotes() {
+    // 同源 iframe 下直接读运行时的真实状态，最准
+    try {
+      var W = frame.contentWindow;
+      if (W && W.__AN__ && W.__AN__.state) {
+        return W.__AN__.state.notes || [];
+      }
+    } catch (e) {}
+    // 兜底：用最近一次消息里的快照
+    return lastNotes;
+  }
+
+  /* ------------------------------------------------------------ 保存 */
+  var saveTimer = null;
+  var saving = false;
+  var pending = false;
+
+  function doSave() {
+    if (!current) return;
+    if (saving) { pending = true; return; }
+
+    var notes = getNotes();
+    saving = true;
+    setStatus('保存中…');
+
+    fetch('/api/notes', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ file: current.file, notes: notes })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        saving = false;
+        if (!d.ok) throw new Error(d.error || '未知错误');
+        current.size = d.size;
+        current.mtime = d.mtime;
+        chipSize.textContent = fmtSize(d.size);
+        setStatus('已存回源文件 · ' + fmtTime(d.mtime) + ' · ' + notes.length + ' 条', 'ok');
+        if (pending) { pending = false; doSave(); }
+      })
+      .catch(function (e) {
+        saving = false;
+        pending = false;
+        setStatus('保存失败：' + e.message, 'err');
+      });
+  }
+
+  function requestSave() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(doSave, 500);
+  }
+
+  /* ------------------------------------------------------------ 宿主接口 */
+  /* 同源 iframe 内运行时通过 window.parent.__AN_HOST__ 直接回调，
+     比 postMessage 更可靠；postMessage 路径保留作兜底。 */
+  window.__AN_HOST__ = {
+    onNoteChange: function (notes) {
+      if (!current) return;
+      lastNotes = notes || [];
+      requestSave();
+    },
+    onStatus: function (text, isErr) {
+      if (text && /失败|错误/.test(text)) setStatus(text, 'err');
+    },
+    onReady: function (count) {
+      ready = true;
+      setStatus(count ? ('已载入 ' + count + ' 条备注 · 改动自动存回') : '点「+ 备注」开始贴', 'ok');
+    }
+  };
+
+  /* ------------------------------------------------------------ 接收子页消息 */
+  window.addEventListener('message', function (ev) {
+    var d = ev.data;
+    if (!d || d.__an !== true) return;
+
+    if (d.type === 'save') { lastNotes = d.notes || []; requestSave(); return; }
+    if (d.type === 'status') {
+      if (d.text && /失败|错误/.test(d.text)) setStatus(d.text, 'err');
+      return;
+    }
+    if (d.type === 'ready') {
+      ready = true;
+      var n = (d.count || 0);
+      setStatus(n ? ('已载入 ' + n + ' 条备注 · 改动自动存回') : '点「+ 备注」开始贴', 'ok');
+      return;
+    }
+  });
+
+  /* ------------------------------------------------------------ 文件浏览器 */
+  var fbMask = document.getElementById('fbMask');
+  var fbPath = document.getElementById('fbPath');
+  var fbBody = document.getElementById('fbBody');
+  var fbQuick = document.getElementById('fbQuick');
+  var fbCwd = '';
+
+  function openPicker() {
+    fbMask.classList.add('on');
+    browse('');
+  }
+
+  function closePicker() {
+    fbMask.classList.remove('on');
+  }
+
+  function browse(dir) {
+    fbBody.innerHTML = '<div class="fb-empty">读取中…</div>';
+    fetch('/api/browse?dir=' + encodeURIComponent(dir || ''))
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (!d.ok) {
+          fbBody.innerHTML = '<div class="fb-empty">' + (d.error || '读取失败') + '</div>';
+          return;
+        }
+        fbCwd = d.cwd || '';
+        fbPath.textContent = d.cwd || '我的电脑';
+        fbPath.title = d.cwd || '我的电脑';
+
+        // 快捷入口
+        fbQuick.innerHTML = '';
+        (d.quick || []).forEach(function (q) {
+          var b = document.createElement('button');
+          b.type = 'button';
+          b.textContent = q.name;
+          b.addEventListener('click', function () { browse(q.path); });
+          fbQuick.appendChild(b);
+        });
+
+        fbBody.innerHTML = '';
+        var frag = document.createDocumentFragment();
+
+        // 返回上级
+        if (d.parent) {
+          frag.appendChild(mkRow('up', '↑', '返回上级', d.parent, null));
+        }
+
+        (d.items || []).forEach(function (it) {
+          if (it.type === 'drive') {
+            frag.appendChild(mkRow('dir', '盘', it.name, it.path, null));
+          } else if (it.type === 'dir') {
+            frag.appendChild(mkRow('dir', '夹', it.name, it.path, null));
+          } else if (it.type === 'file') {
+            frag.appendChild(mkRow('file', 'H', it.name, it.path, fmtSize(it.size)));
+          }
+        });
+
+        if (!fbBody.children.length && !frag.childNodes.length) {
+          frag.appendChild(el('div', 'fb-empty', '这个文件夹里没有 HTML 文件'));
+        }
+        fbBody.appendChild(frag);
+      })
+      .catch(function (e) {
+        fbBody.innerHTML = '<div class="fb-empty">读取失败：' + e.message + '</div>';
+      });
+  }
+
+  function mkRow(kind, ico, name, p, meta) {
+    var row = document.createElement('div');
+    row.className = 'fb-row ' + kind;
+    var i = document.createElement('span');
+    i.className = 'fb-ico';
+    i.textContent = ico;
+    row.appendChild(i);
+    var n = document.createElement('span');
+    n.className = 'fb-name';
+    n.textContent = name;
+    n.title = p;
+    row.appendChild(n);
+    if (meta) {
+      var m = document.createElement('span');
+      m.className = 'fb-meta';
+      m.textContent = meta;
+      row.appendChild(m);
+    }
+    row.addEventListener('click', function () {
+      if (kind === 'file') {
+        closePicker();
+        pickAndLoad(p);
+      } else {
+        browse(p);
+      }
+    });
+    return row;
+  }
+
+  function el(tag, cls, txt) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (txt != null) n.textContent = txt;
+    return n;
+  }
+
+  function pickAndLoad(p) {
+    showVeil(true, '正在载入…');
+    fetch('/api/stat?file=' + encodeURIComponent(p))
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        showVeil(false);
+        if (!d.ok) { setStatus('载入失败：' + (d.error || ''), 'err'); return; }
+        loadFile(d);
+      })
+      .catch(function (e) {
+        showVeil(false);
+        setStatus('载入失败：' + e.message, 'err');
+      });
+  }
+
+  function loadFile(d) {
+    current = d;
+    ready = false;
+
+    chip.classList.add('on');
+    chipName.textContent = d.name;
+    chipName.title = d.file;
+    chipSize.textContent = fmtSize(d.size);
+
+    btnReload.disabled = false;
+    btnPurge.disabled = false;
+    empty.classList.add('hide');
+
+    setStatus('载入中…');
+    frame.src = '/api/view?file=' + encodeURIComponent(d.file) + '&t=' + Date.now();
+  }
+
+  /* 兜底：只要 iframe 开始加载，就确保空态层不挡视线 */
+  frame.addEventListener('load', function () {
+    if (frame.getAttribute('src')) empty.classList.add('hide');
+  });
+
+  /* ------------------------------------------------------------ 重载 / 清除 */
+  btnOpen.addEventListener('click', openPicker);
+
+  document.getElementById('fbClose').addEventListener('click', closePicker);
+  fbMask.addEventListener('click', function (e) {
+    if (e.target === fbMask) closePicker();
+  });
+
+  btnReload.addEventListener('click', function () {
+    if (!current) return;
+    ready = false;
+    setStatus('重新载入…');
+    frame.src = '/api/view?file=' + encodeURIComponent(current.file) + '&t=' + Date.now();
+  });
+
+  btnPurge.addEventListener('click', function () {
+    if (!current) return;
+    if (!confirm(
+      '确定清除该原型的全部备注？\n\n' +
+      current.name + '\n\n' +
+      '备注数据与运行时脚本会从文件中移除，原型恢复干净状态。\n' +
+      '此操作不可撤销，建议先点「导出文本」备份。'
+    )) return;
+
+    showVeil(true, '正在清除…');
+    fetch('/api/purge', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ file: current.file })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        showVeil(false);
+        if (!d.ok) throw new Error(d.error || '未知错误');
+        setStatus('已清除，原型恢复干净', 'ok');
+        current.size = d.size;
+        chipSize.textContent = fmtSize(d.size);
+        btnReload.click();
+      })
+      .catch(function (e) {
+        showVeil(false);
+        setStatus('清除失败：' + e.message, 'err');
+      });
+  });
+
+  /* ------------------------------------------------------------ 键盘快捷键 */
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && fbMask.classList.contains('on')) {
+      closePicker();
+      return;
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'o') {
+      e.preventDefault();
+      openPicker();
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+      e.preventDefault();
+      if (current) doSave();
+    }
+  });
+
+  /* ------------------------------------------------------------ 首屏自检 */
+  fetch('/api/ping').then(function (r) { return r.json(); }).then(function () {
+    // 支持 ?file=xxx 直接载入（便于从命令行/快捷方式拉起指定原型）
+    var q = new URLSearchParams(location.search);
+    var pre = q.get('file');
+    if (pre) {
+      fetch('/api/stat?file=' + encodeURIComponent(pre))
+        .then(function (r) { return r.json(); })
+        .then(function (d) { if (d.ok) loadFile(d); else setStatus('载入失败：' + (d.error || ''), 'err'); })
+        .catch(function () { setStatus('就绪 · 点「打开原型」开始'); });
+      return;
+    }
+    setStatus('就绪 · 点「打开原型」开始');
+  }).catch(function () {
+    setStatus('服务未响应', 'err');
+  });
+})();
+</script>
+</body>
+</html>
