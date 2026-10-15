@@ -1,5 +1,5 @@
 /* ==========================================================================
- * html-note · 本地服务 src/server.js
+ * proto-tool · 本地服务 src/server.js
  * --------------------------------------------------------------------------
  * 职责：
  *   1. 提供工具宿主页（src/index.html）与静态资源
@@ -27,23 +27,79 @@ const RUNTIME_FILE = path.join(SRC, 'runtime', 'annotator.js');
 
 const HOST = '127.0.0.1';
 
-/* 端口：优先命令行 --port，其次环境变量 PORT，最后默认值。
-   不写死端口，方便多实例或端口冲突时切换。 */
-function resolvePort() {
-  const argv = process.argv;
-  const i = argv.indexOf('--port');
-  if (i !== -1 && argv[i + 1]) {
-    const n = parseInt(argv[i + 1], 10);
-    if (n > 0 && n < 65536) return n;
-  }
-  const env = parseInt(process.env.PORT, 10);
-  if (env > 0 && env < 65536) return env;
-  return 7317;
-}
-const PORT = resolvePort();
+const APP_NAME = 'proto-tool';
 
-const APP_NAME = 'html-note';
-const APP_VERSION = 1;
+/* 版本号只认 package.json 一个源，避免两处各写各的、发版时对不上。 */
+function readVersion() {
+  try {
+    const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
+    return pkg.version || '0.0.0';
+  } catch (e) {
+    return '0.0.0';
+  }
+}
+
+/* 参数解析收在一处：端口、是否开浏览器、是否只看帮助/版本。
+   端口优先级 —— 命令行 --port > 环境变量 PORT > 默认 7317。
+   不写死端口，方便多实例或端口冲突时切换。 */
+function parseArgs(argv) {
+  const opt = { port: null, open: false, help: false, version: false };
+  for (let i = 0; i < argv.length; i++) {
+    const a = argv[i];
+    if (a === '--port' || a === '-p') {
+      const n = parseInt(argv[i + 1], 10);
+      if (n > 0 && n < 65536) opt.port = n;
+      i++;
+    } else if (a === '--open' || a === '-o') {
+      opt.open = true;
+    } else if (a === '--help' || a === '-h') {
+      opt.help = true;
+    } else if (a === '--version' || a === '-v') {
+      opt.version = true;
+    }
+  }
+  if (opt.port === null) {
+    const env = parseInt(process.env.PORT, 10);
+    if (env > 0 && env < 65536) opt.port = env;
+  }
+  if (opt.port === null) opt.port = 7317;
+  return opt;
+}
+
+const OPT = parseArgs(process.argv.slice(2));
+const PORT = OPT.port;
+
+function printHelp() {
+  const lines = [
+    '',
+    '  ' + APP_NAME + ' v' + readVersion(),
+    '  给任意 HTML 原型贴便利贴，备注直接烧进文件。',
+    '',
+    '  用法:',
+    '    ' + APP_NAME + ' [选项]',
+    '',
+    '  选项:',
+    '    -p, --port <端口>   监听端口（默认 7317，也可用环境变量 PORT）',
+    '    -o, --open          启动后自动打开浏览器',
+    '    -h, --help          显示本帮助',
+    '    -v, --version       显示版本号',
+    '',
+    '  示例:',
+    '    ' + APP_NAME + ' --open',
+    '    ' + APP_NAME + ' --port 8080',
+    '',
+  ];
+  console.log(lines.join('\n'));
+}
+
+if (OPT.help) {
+  printHelp();
+  process.exit(0);
+}
+if (OPT.version) {
+  console.log(readVersion());
+  process.exit(0);
+}
 
 /* ------------------------------------------------------------ 运行时读取 */
 
@@ -297,13 +353,13 @@ function openBrowser(url) {
 server.listen(PORT, HOST, () => {
   const url = 'http://' + HOST + ':' + PORT + '/';
   console.log('');
-  console.log('  ' + APP_NAME + ' 已启动');
+  console.log('  ' + APP_NAME + ' v' + readVersion() + ' 已启动');
   console.log('  ' + url);
   console.log('');
   console.log('  保持本窗口开启；关闭窗口即停止服务。');
   console.log('  备注已经写进 HTML 文件，关窗不会丢。');
   console.log('');
-  if (process.argv.includes('--open')) openBrowser(url);
+  if (OPT.open) openBrowser(url);
 });
 
 server.on('error', (e) => {
@@ -312,9 +368,9 @@ server.on('error', (e) => {
     console.log('');
     console.log('  端口 ' + PORT + ' 已被占用，可能工具已经在运行。');
     console.log('  直接访问 ' + url);
-    console.log('  或换端口： node src/server.js --port 7318');
+    console.log('  或换端口： ' + APP_NAME + ' --port 7318');
     console.log('');
-    if (process.argv.includes('--open')) openBrowser(url);
+    if (OPT.open) openBrowser(url);
   } else {
     console.error('启动失败：', e);
   }

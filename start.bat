@@ -1,11 +1,11 @@
 @echo off
 setlocal enabledelayedexpansion
 cd /d "%~dp0"
-title html-note
+title proto-tool
 
 echo.
 echo   ============================================
-echo      html-note  -  HTML annotation tool
+echo      proto-tool  -  HTML annotation tool
 echo   ============================================
 echo.
 

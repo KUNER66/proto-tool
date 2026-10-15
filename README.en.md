@@ -1,12 +1,19 @@
 <div align="center">
 
-# html-note
+# proto-tool
 
 **Sticky notes for any HTML prototype — burned right into the file.**
 
 Send it to someone. They double-click. The notes are there.
 
 `zero dependencies` · `fully offline` · `self-contained file` · `cross-platform`
+
+[![CI](https://github.com/KUNER66/proto-tool/actions/workflows/ci.yml/badge.svg)](https://github.com/KUNER66/proto-tool/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+[![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](https://nodejs.org)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](./CONTRIBUTING.md)
+
+[English](./README.en.md) · [中文](./README.md)
 
 </div>
 
@@ -22,7 +29,7 @@ Axure has annotations. Figma has comments. But **the moment you export to HTML, 
 Online annotation tools (like Hypothes.is) need a network, an account, and a server —
 hand the file to someone else and your notes don't travel with it.
 
-**html-note takes a different route: it writes the notes into the HTML file itself.**
+**proto-tool takes a different route: it writes the notes into the HTML file itself.**
 
 ```
 ┌──────────────┐     ┌──────────────────────┐     ┌──────────────────┐
@@ -65,17 +72,25 @@ shows up in place.
 ### Option 2: Command line
 
 ```bash
-git clone <this-repo>
-cd html-note
+git clone https://github.com/KUNER66/proto-tool.git
+cd proto-tool
 npm start          # starts the server and opens the browser
 ```
 
-Custom port:
+CLI flags:
+
+| Flag | Description |
+|---|---|
+| `-p, --port <port>` | Listening port (default `7317`; `PORT` env var also works) |
+| `-o, --open` | Open the browser on start |
+| `-h, --help` | Show help |
+| `-v, --version` | Print version |
 
 ```bash
-PORT=7320 npm start                  # macOS / Linux
-set PORT=7320 && start.bat           # Windows
-node src/server.js --port 7320       # pass it directly
+proto-tool --open                    # after installing globally
+node src/server.js --port 7320       # or pass it directly
+PORT=7320 npm start                  # via env var (macOS / Linux)
+set PORT=7320 && start.bat           # via env var (Windows)
 ```
 
 ### Option 3: Just try it
@@ -160,7 +175,7 @@ browse the list, and cannot accidentally modify your file.
 ## Project layout
 
 ```
-html-note/
+proto-tool/
 ├── start.bat                   Windows launcher (double-click)
 ├── start.sh                    macOS / Linux launcher
 ├── package.json

@@ -1,0 +1,37 @@
+# 换行策略：仓库内一律存 LF，检出时按平台决定。
+# 理由：跨平台脚本一旦被塞进 CRLF 就会在 *nix 上直接报 "bad interpreter"，
+# 这是开源项目最常见的"我这儿能跑你那儿不行"来源，用属性文件从根上定死。
+* text=auto eol=lf
+
+# Windows 批处理：内容是 GBK 编码，且必须保持 CRLF。
+# 标成 binary 让 git 完全不碰它（不做换行转换、不做编码转换、不参与 diff），
+# 这样工作区里的 \r\n 和 GBK 字节原样进仓库，检出后仍然可用。
+# 注意：因为这个文件被当成二进制，改它之后 git 不会给出行级 diff，
+# 需要用 --stat / --numstat 或直接看文件来核对变更。
+*.bat binary
+*.cmd binary
+
+# Shell 脚本必须 LF。
+*.sh text eol=lf
+
+# 二进制文件不做任何转换。
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.eot binary
+*.zip binary
+*.gz binary
+*.exe binary
+*.dll binary
+*.node binary
+*.pdf binary
+
+# 生成的锁文件折叠在 review 里，避免污染 diff。
+package-lock.json linguist-generated=true

@@ -1,5 +1,5 @@
 {
-  "name": "html-note",
+  "name": "proto-tool",
   "version": "0.1.0",
   "description": "给任意 HTML 原型贴便利贴，备注直接烧进文件——发给别人双击就能看到，零依赖、零联网。",
   "keywords": [
@@ -14,23 +14,26 @@
     "self-contained"
   ],
   "license": "MIT",
-  "author": "",
+  "author": "KUNER66",
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "git+https://github.com/KUNER66/proto-tool.git"
   },
-  "homepage": "",
+  "homepage": "https://github.com/KUNER66/proto-tool#readme",
   "bugs": {
-    "url": ""
+    "url": "https://github.com/KUNER66/proto-tool/issues"
   },
   "main": "lib/injector.js",
   "bin": {
-    "html-note": "src/server.js"
+    "proto-tool": "src/server.js"
   },
   "files": [
     "lib/",
     "src/"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "start": "node src/server.js --open",
     "serve": "node src/server.js",

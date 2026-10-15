@@ -1,6 +1,6 @@
 # 贡献指南
 
-感谢你有兴趣参与 html-note。以下是几条能让协作顺滑的约定。
+感谢你有兴趣参与 proto-tool。以下是几条能让协作顺滑的约定。
 
 ---
 
@@ -10,8 +10,8 @@
 - **零第三方依赖**——请尽量保持这一点。引入依赖前请先开 issue 讨论。
 
 ```bash
-git clone <this-repo>
-cd html-note
+git clone https://github.com/KUNER66/proto-tool.git
+cd proto-tool
 npm run serve      # 启动本地服务（默认 http://127.0.0.1:7317）
 npm test           # 注入逻辑单元测试
 ```

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==========================================================================
-# html-note · macOS / Linux 启动脚本
+# proto-tool · macOS / Linux 启动脚本
 #   用法：  ./start.sh            （默认端口 7317）
 #           PORT=7320 ./start.sh （自定义端口）
 # ==========================================================================
@@ -11,7 +11,7 @@ APP_PORT="${PORT:-7317}"
 
 echo
 echo "  ============================================"
-echo "     html-note  -  HTML annotation tool"
+echo "     proto-tool  -  HTML annotation tool"
 echo "  ============================================"
 echo
 

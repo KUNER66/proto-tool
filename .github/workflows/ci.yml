@@ -36,16 +36,26 @@ jobs:
         shell: bash
         run: |
           node src/server.js --port 7318 > server.log 2>&1 &
-          for i in $(seq 1 30); do
-            if curl -s -m 2 http://127.0.0.1:7318/api/ping > /dev/null 2>&1; then
-              echo "server is up"
-              exit 0
-            fi
-            sleep 0.5
-          done
-          echo "server failed to start"
-          cat server.log
-          exit 1
+          node -e '
+            const http = require("http");
+            const deadline = Date.now() + 20000;
+            (function poll() {
+              const req = http.get({host:"127.0.0.1",port:7318,path:"/api/ping"}, res => {
+                res.resume();
+                if (res.statusCode === 200) { console.log("server is up"); process.exit(0); }
+                retry();
+              });
+              req.on("error", retry);
+              function retry() {
+                if (Date.now() > deadline) {
+                  console.error("server failed to start");
+                  require("fs").readFileSync("server.log","utf8").split("\n").forEach(l => console.error(l));
+                  process.exit(1);
+                }
+                setTimeout(poll, 300);
+              }
+            })();
+          '
 
       - name: End-to-end tests (local server)
         env:

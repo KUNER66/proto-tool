@@ -1,12 +1,19 @@
 <div align="center">
 
-# html-note
+# proto-tool
 
 **给任意 HTML 原型贴便利贴，备注直接烧进文件。**
 
 发给别人，双击就能看到。不装工具、不联网、不用账号。
 
 `零依赖` · `离线可用` · `单文件自包含` · `跨平台`
+
+[![CI](https://github.com/KUNER66/proto-tool/actions/workflows/ci.yml/badge.svg)](https://github.com/KUNER66/proto-tool/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+[![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](https://nodejs.org)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](./CONTRIBUTING.md)
+
+[English](./README.en.md) · [中文](./README.md)
 
 </div>
 
@@ -22,7 +29,7 @@ Axure 有批注、Figma 有评论，但**一旦导出成 HTML，这些批注就�
 在线批注工具（如 Hypothes.is）又要联网、要账号、依附在服务器上，
 文件发给别人就看不见了。
 
-**html-note 换了个思路：把备注写进 HTML 文件本身。**
+**proto-tool 换了个思路：把备注写进 HTML 文件本身。**
 
 ```
 ┌──────────────┐     ┌──────────────────────┐     ┌──────────────┐
@@ -64,17 +71,25 @@ Axure 有批注、Figma 有评论，但**一旦导出成 HTML，这些批注就�
 ### 方式二：命令行
 
 ```bash
-git clone <this-repo>
-cd html-note
-npm start          # 启动并自动打开浏览器
+git clone https://github.com/KUNER66/proto-tool.git
+cd proto-tool
+npm start                  # 启动并自动打开浏览器
 ```
 
-自定义端口：
+命令行参数：
+
+| 参数 | 说明 |
+|---|---|
+| `-p, --port <端口>` | 监听端口（默认 `7317`，也可用环境变量 `PORT`） |
+| `-o, --open` | 启动后自动打开浏览器 |
+| `-h, --help` | 显示帮助 |
+| `-v, --version` | 显示版本号 |
 
 ```bash
-PORT=7320 npm start                        # macOS / Linux
-set PORT=7320 && start.bat                 # Windows
-node src/server.js --port 7320             # 直接传参
+proto-tool --open                    # 装成全局命令后
+node src/server.js --port 7320       # 不装全局，直接传参
+PORT=7320 npm start                  # 用环境变量（macOS / Linux）
+set PORT=7320 && start.bat           # 用环境变量（Windows）
 ```
 
 ### 方式三：只想看看效果
@@ -151,7 +166,7 @@ node src/server.js --port 7320             # 直接传参
 ## 项目结构
 
 ```
-html-note/
+proto-tool/
 ├── start.bat                   Windows 启动器（双击即用）
 ├── start.sh                    macOS / Linux 启动器
 ├── package.json
