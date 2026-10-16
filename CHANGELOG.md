@@ -5,11 +5,39 @@
 ## [未发布]
 
 ### 计划中
-- Tauri 桌面客户端（免装 Node，安装包 ~5MB）
 - 备注导出为 Markdown / 需求文档格式
 - 多文件原型支持
+- macOS / Linux 桌面产物
 
 ---
+
+## [0.2.0] - 2026-10-16
+
+Tauri 桌面客户端。
+
+### 新增
+- **桌面客户端（Tauri 2）**：单个安装包，免装 Node。Windows 实测 NSIS 1.2 MB、
+  MSI 1.6 MB、主程序 3.07 MB。产物在 `src-tauri/target/release/bundle/`。
+- **Rust 侧文件指令**：`list_roots` / `list_dir` / `read_text_file` /
+  `write_text_file`（原子写）/ `stat_file` / `read_runtime`。
+- **前端双层宿主适配**：`src/index.html` 新增 `host` 层——HTTP 模式走 `fetch('/api/*')`，
+  桌面模式走 Tauri `invoke`，两者对外暴露完全相同的数据形状，业务代码零改动。
+
+### 变更
+- **目录结构**：前端资源收进 `src/`（含 `lib/injector.js`），Node 服务独立为 `server/index.js`。
+  起因是 Tauri 打包会把 `frontendDist` 指向的目录整体嵌入二进制，其中不能混入非前端文件。
+- **`src/lib/injector.js` 改为 UMD**：Node 走 `require()`，浏览器 / WebView 挂
+  `AN_INJECTOR` 全局；用 IIFE 包裹避免内部辅助函数泄漏到全局作用域。
+- `package.json` 版本升到 0.2.0，新增 `desktop` / `desktop:build` / `tauri` 脚本。
+
+### 设计说明
+Rust 侧**只做文件 IO**；剥离旧标记、构造数据块、插入运行时全部交给
+`src/lib/injector.js`，桌面端与 Node 服务端共用同一份实现。两处各写一份必然漂移，
+最后会出现「同一个文件用不同方式打开、存出来的结果不一样」。
+
+### 已知限制
+- 仓库只配置了 Windows 的 `nsis` / `msi` 产物。macOS / Linux 需各自的原生依赖
+  （Xcode CLT / webkit2gtk），并在 `tauri.conf.json` 的 `bundle.targets` 里放开对应格式。
 
 ## [0.1.0] - 2026-10-15
 

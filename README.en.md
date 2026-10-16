@@ -103,7 +103,7 @@ Two sample prototypes live in `examples/` — open either one with the tool.
 
 Prefer not to install Node or touch a terminal? The desktop build packages everything into a single exe.
 
-> **Status**: code complete, installer not built yet.
+> **Status**: buildable. Measured Windows installers: **1.2 MB** (NSIS) / **1.6 MB** (MSI); main binary 3.07 MB.
 
 ### Building the desktop app
 
@@ -302,7 +302,7 @@ Requires Node 18+. **No third-party dependencies.**
 ## Roadmap
 
 - [x] v0.1 · Node local server + browser UI
-- [~] v0.2 · Tauri desktop client (~5 MB installer, no Node required) - code complete, build pending
+- [x] v0.2 · Tauri desktop client (measured installer 1.2 MB, well under the estimated 5 MB)
 - [ ] v0.3 · Export notes as Markdown / spec-document format
 - [ ] v0.4 · Multi-file prototype support
 
