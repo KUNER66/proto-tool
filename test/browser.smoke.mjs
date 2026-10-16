@@ -177,6 +177,39 @@ const t4 = await ev(`(function(){
 })()`);
 ok('拖动 1:1 精确跟手', t4.allExact === true, t4);
 
+/* 8. 宿主 → 运行时的状态回写通道
+   背景：运行时把工具条刷成「保存中…」后，写盘结果只有宿主知道。
+   以前没有任何回写通道，导致那行字永远挂着（HTTP 与桌面端都中招）。
+   现在运行时多了 __AN__.setStatus 供宿主回写。
+
+   注意本测试的上下文：它是直接打开 /api/view 输出的 HTML 单跑运行时，
+   没有宿主页，所以「保存中…」在这里挂着是正确行为，不能拿它当断言。
+   这里只验证通道本身存在且生效；宿主是否调用它由真机手动验证。 */
+const t5 = await ev(`(function(){
+  var A = window.__AN__;
+  var before = (document.getElementById('an-status') || {}).textContent;
+  var hasSetter = typeof A.setStatus === 'function';
+  if (hasSetter) A.setStatus('已保存 · 测试', false);
+  var s = document.getElementById('an-status');
+  return {
+    hasSetter: hasSetter,
+    before: before,
+    after: s ? s.textContent : null,
+    saving: A.state ? A.state.saving : '(no state)'
+  };
+})()`);
+ok('运行时暴露状态回写口 setStatus', t5.hasSetter === true, t5);
+ok('回写后工具条文案被改写', t5.after === '已保存 · 测试', t5);
+ok('回写后 saving 标记复位', t5.saving === false, t5);
+
+/* 9. 错误态回写：宿主保存失败时应把红色错误态也刷进工具条 */
+const t6 = await ev(`(function(){
+  window.__AN__.setStatus('保存失败', true);
+  var s = document.getElementById('an-status');
+  return { text: s ? s.textContent : null, isErr: s ? s.classList.contains('is-err') : null };
+})()`);
+ok('回写错误态带 is-err 样式', t6.text === '保存失败' && t6.isErr === true, t6);
+
 console.log('');
 console.log('  ' + pass + ' passed, ' + fail + ' failed');
 

@@ -870,7 +870,16 @@
     rebind: rebindAnchor,
     isEditMode: function () { return EDIT; },
     markBegin: MARK_BEGIN,
-    markEnd: MARK_END
+    markEnd: MARK_END,
+
+    /* 宿主写盘完成后回写状态用的口子。
+       运行时自己只负责把状态刷成「保存中…」，写盘结果只有宿主那边知道；
+       没有这个口子的话，工具条会永远停在「保存中…」再也回不来。
+       同时把 saving 复位——它是"这一轮保存还没结束"的标记。 */
+    setStatus: function (text, isErr) {
+      state.saving = false;
+      reportStatus(text, isErr);
+    }
   };
 
   boot();

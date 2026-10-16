@@ -573,6 +573,16 @@
   var saving = false;
   var pending = false;
 
+  /* 把写盘结果回写到 iframe 内的工具条。
+     运行时只能表达「保存中…」，成功与否只有宿主知道，必须由宿主回写，
+     否则那个「保存中…」会一直挂着。 */
+  function tellRuntime(text, isErr) {
+    try {
+      var w = frame.contentWindow;
+      if (w && w.__AN__ && w.__AN__.setStatus) w.__AN__.setStatus(text, isErr);
+    } catch (e) { /* 跨源或运行时未就绪，忽略 */ }
+  }
+
   function doSave() {
     if (!current) return;
     if (saving) { pending = true; return; }
@@ -589,12 +599,14 @@
         current.mtime = d.mtime;
         chipSize.textContent = fmtSize(d.size);
         setStatus('已存回源文件 · ' + fmtTime(d.mtime) + ' · ' + notes.length + ' 条', 'ok');
+        tellRuntime('已保存 · ' + fmtTime(d.mtime), false);
         if (pending) { pending = false; doSave(); }
       })
       .catch(function (e) {
         saving = false;
         pending = false;
         setStatus('保存失败：' + e.message, 'err');
+        tellRuntime('保存失败', true);
       });
   }
 
