@@ -4,6 +4,16 @@
 
 ## [未发布]
 
+### 变更
+- **主仓库迁到 Gitee**：`https://gitee.com/SKSKCODE/nami`，GitHub 地址保留为镜像。
+  README 中英双版、`package.json`、`CONTRIBUTING.md`、CHANGELOG 里的链接已同步更新；
+  GitHub Actions 的 CI 徽章换成 Gitee 星标徽章（Gitee 不提供流水线徽章）。
+- **新增 Gitee Go 流水线** `.workflow/ci.yml`。GitHub Actions 与 Gitee Go 的差异：
+  触发写在 `triggers.push.branches.precise`（不是 `on.push.branches`）；
+  没有 `strategy.matrix` / `runs-on`，Node 版本矩阵只能展开成多个 `stage`；
+  `nodeVersion` 必须写具体版本号，不支持 `18` 这类大版本简写。
+- 桌面端 bundle identifier 由 `io.github.kuner66.proto-tool` 改为 `com.skskcode.proto-tool`。
+
 ### 计划中
 - 备注导出为 Markdown / 需求文档格式
 - 多文件原型支持
@@ -68,5 +78,5 @@ Rust 侧**只做文件 IO**；剥离旧标记、构造数据块、插入运行�
 - 修复新建空备注在失焦后被静默删除的问题，允许「先摆位置、后填字」。
 - 修复编辑结束后便利贴操作按钮内联样式未复位的问题。
 
-[未发布]: https://github.com/KUNER66/proto-tool/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/KUNER66/proto-tool/releases/tag/v0.1.0
+[未发布]: https://gitee.com/SKSKCODE/nami/compare/v0.1.0...HEAD
+[0.1.0]: https://gitee.com/SKSKCODE/nami/releases

@@ -10,7 +10,7 @@
 - **零第三方依赖**——请尽量保持这一点。引入依赖前请先开 issue 讨论。
 
 ```bash
-git clone https://github.com/KUNER66/proto-tool.git
+git clone https://gitee.com/SKSKCODE/nami.git
 cd proto-tool
 npm run serve      # 启动本地服务（默认 http://127.0.0.1:7317）
 npm test           # 注入逻辑单元测试

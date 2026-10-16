@@ -8,7 +8,7 @@ Send it to someone. They double-click. The notes are there.
 
 `zero dependencies` · `fully offline` · `self-contained file` · `cross-platform`
 
-[![CI](https://github.com/KUNER66/proto-tool/actions/workflows/ci.yml/badge.svg)](https://github.com/KUNER66/proto-tool/actions/workflows/ci.yml)
+[![star](https://gitee.com/SKSKCODE/nami/badge/star.svg?theme=white)](https://gitee.com/SKSKCODE/nami)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](https://nodejs.org)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](./CONTRIBUTING.md)
@@ -72,7 +72,7 @@ shows up in place.
 ### Option 2: Command line
 
 ```bash
-git clone https://github.com/KUNER66/proto-tool.git
+git clone https://gitee.com/SKSKCODE/nami.git
 cd proto-tool
 npm start          # starts the server and opens the browser
 ```
@@ -118,7 +118,7 @@ Three prerequisites, installed once:
 Windows 10 21H2 / 11 ship the WebView2 runtime, so nothing extra is needed.
 
 ```bash
-git clone https://github.com/KUNER66/proto-tool.git
+git clone https://gitee.com/SKSKCODE/nami.git
 cd proto-tool
 npm install
 npm run desktop:build

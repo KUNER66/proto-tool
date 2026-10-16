@@ -19,11 +19,11 @@
   "author": "KUNER66",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/KUNER66/proto-tool.git"
+    "url": "git+https://gitee.com/SKSKCODE/nami.git"
   },
-  "homepage": "https://github.com/KUNER66/proto-tool#readme",
+  "homepage": "https://gitee.com/SKSKCODE/nami",
   "bugs": {
-    "url": "https://github.com/KUNER66/proto-tool/issues"
+    "url": "https://gitee.com/SKSKCODE/nami/issues"
   },
   "main": "src/lib/injector.js",
   "bin": {

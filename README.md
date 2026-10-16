@@ -8,7 +8,7 @@
 
 `零依赖` · `离线可用` · `单文件自包含` · `跨平台`
 
-[![CI](https://github.com/KUNER66/proto-tool/actions/workflows/ci.yml/badge.svg)](https://github.com/KUNER66/proto-tool/actions/workflows/ci.yml)
+[![star](https://gitee.com/SKSKCODE/nami/badge/star.svg?theme=white)](https://gitee.com/SKSKCODE/nami)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](https://nodejs.org)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](./CONTRIBUTING.md)
@@ -71,7 +71,7 @@ Axure 有批注、Figma 有评论，但**一旦导出成 HTML，这些批注就�
 ### 方式二：命令行
 
 ```bash
-git clone https://github.com/KUNER66/proto-tool.git
+git clone https://gitee.com/SKSKCODE/nami.git
 cd proto-tool
 npm start                  # 启动并自动打开浏览器
 ```
@@ -117,7 +117,7 @@ set PORT=7320 && start.bat           # 用环境变量（Windows）
 Windows 10 21H2 / 11 自带 WebView2 运行时，无需额外安装。
 
 ```bash
-git clone https://github.com/KUNER66/proto-tool.git
+git clone https://gitee.com/SKSKCODE/nami.git
 cd proto-tool
 npm install
 npm run desktop:build
