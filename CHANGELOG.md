@@ -13,6 +13,12 @@
   没有 `strategy.matrix` / `runs-on`，Node 版本矩阵只能展开成多个 `stage`；
   `nodeVersion` 必须写具体版本号，不支持 `18` 这类大版本简写。
 - 桌面端 bundle identifier 由 `io.github.kuner66.proto-tool` 改为 `com.skskcode.proto-tool`。
+- **修好一处配置打架**：`.gitignore` 把 `package-lock.json` 忽略了，
+  而 `.gitattributes` 又声明 `package-lock.json linguist-generated=true`
+  （意思是"提交它，只在 diff 里折叠"）——两处矛盾，结果锁文件一直没进仓库，
+  谁克隆下来都是各自现算一遍依赖版本。现改为提交锁文件；
+  `yarn.lock` / `pnpm-lock.yaml` 仍忽略（本项目不用这两个包管理器，
+  留着是防止有人手滑跑一次就在仓库里多出个没人维护的锁）。
 
 ### 计划中
 - 备注导出为 Markdown / 需求文档格式

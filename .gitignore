@@ -1,6 +1,13 @@
 # ---- 依赖 ----
 node_modules/
-package-lock.json
+
+# package-lock.json 是**要提交**的：本项目用 npm，锁文件能保证任何人
+# 在任何时间装到的依赖版本完全一致。
+# 早先这里把三种锁文件都忽略了，但 .gitattributes 又声明
+# `package-lock.json linguist-generated=true`（即"提交它，只是 diff 里折叠"）
+# ——两处配置打架，结果锁文件根本没进仓库。现在统一为：提交它。
+# yarn / pnpm 的锁文件仍然忽略：本项目不用这两个管理器，
+# 留着是防止有人手滑跑一次就在仓库里多出一个没人维护的锁文件。
 yarn.lock
 pnpm-lock.yaml
 
