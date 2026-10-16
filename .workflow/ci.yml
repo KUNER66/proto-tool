@@ -1,19 +1,23 @@
 # ===========================================================================
-# Gitee Go 流水线：Node 版本测试矩阵
+# Gitee Go 流水线：单元测试 + 端到端测试
 #
 # 与 GitHub Actions 的差异（改写时踩过，记下来）：
 #   · 触发写 triggers.push.branches.precise，不是 on.push.branches
-#   · 没有 strategy.matrix / runs-on，矩阵只能展开成多个 stage
+#   · 没有 strategy.matrix / runs-on，多版本矩阵只能展开成多个 stage
 #   · 每个 step 自己声明构建环境（build@nodejs + nodeVersion）
 #   · nodeVersion 要写具体版本号，不支持 "18" 这种大版本简写
 #
-# 说明：Gitee Go 免费额度有分钟数限制，嫌耗时可以只留一个 stage。
+# 关于 Node 版本：这里只跑 package.json engines 声明的**最低支持版本** 18。
+# 原因是 Gitee Go 免费额度按分钟计，多版本矩阵成本翻倍；而"下限能过"
+# 比"上限能过"信息量更大——新版本上出问题通常是依赖的锅，旧版本上出问题
+# 往往是自己代码的锅。需要回归新版时再补 stage 即可。
+#
 # 真机浏览器冒烟（test/browser.smoke.mjs）需要 Chromium，这里不跑，
 # 与 GitHub Actions 上的行为保持一致。
 # ===========================================================================
 version: '1.0'
 name: ci
-displayName: 测试矩阵
+displayName: 单元测试与端到端测试
 
 triggers:
   push:
@@ -27,7 +31,7 @@ triggers:
 
 stages:
   - stage:
-      name: test-node18
+      name: test
       displayName: Node 18
       strategy: fast
       steps:
@@ -35,52 +39,6 @@ stages:
           name: test18
           displayName: 单元测试 + 端到端测试
           nodeVersion: 18.20.4
-          commands:
-            - |
-              set -e
-              node -v && npm -v
-
-              node test/injector.test.js
-
-              node server/index.js --port 7318 > server.log 2>&1 &
-              node -e "const http=require('http');const deadline=Date.now()+20000;(function poll(){const r=http.get({host:'127.0.0.1',port:7318,path:'/api/ping'},res=>{res.resume();if(res.statusCode===200){console.log('server is up');process.exit(0);}retry();});r.on('error',retry);function retry(){if(Date.now()>deadline){console.error('server failed to start');require('fs').readFileSync('server.log','utf8').split('\n').forEach(l=>console.error(l));process.exit(1);}setTimeout(poll,300);}})();"
-
-              PORT_TEST=7318 node test/server.e2e.js
-          caches:
-            - ~/.npm
-
-  - stage:
-      name: test-node20
-      displayName: Node 20
-      strategy: fast
-      steps:
-        - step: build@nodejs
-          name: test20
-          displayName: 单元测试 + 端到端测试
-          nodeVersion: 20.19.0
-          commands:
-            - |
-              set -e
-              node -v && npm -v
-
-              node test/injector.test.js
-
-              node server/index.js --port 7318 > server.log 2>&1 &
-              node -e "const http=require('http');const deadline=Date.now()+20000;(function poll(){const r=http.get({host:'127.0.0.1',port:7318,path:'/api/ping'},res=>{res.resume();if(res.statusCode===200){console.log('server is up');process.exit(0);}retry();});r.on('error',retry);function retry(){if(Date.now()>deadline){console.error('server failed to start');require('fs').readFileSync('server.log','utf8').split('\n').forEach(l=>console.error(l));process.exit(1);}setTimeout(poll,300);}})();"
-
-              PORT_TEST=7318 node test/server.e2e.js
-          caches:
-            - ~/.npm
-
-  - stage:
-      name: test-node22
-      displayName: Node 22
-      strategy: fast
-      steps:
-        - step: build@nodejs
-          name: test22
-          displayName: 单元测试 + 端到端测试
-          nodeVersion: 22.14.0
           commands:
             - |
               set -e
